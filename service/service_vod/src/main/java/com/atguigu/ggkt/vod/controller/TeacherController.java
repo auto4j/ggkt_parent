@@ -3,11 +3,16 @@ package com.atguigu.ggkt.vod.controller;
 
 import com.atguigu.ggkt.model.vod.Teacher;
 import com.atguigu.ggkt.result.Result;
+import com.atguigu.ggkt.vo.vod.TeacherQueryVo;
 import com.atguigu.ggkt.vod.service.TeacherService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
@@ -62,6 +67,51 @@ public class TeacherController {
         } else {
             return Result.fail(null);
         }
+    }
+
+    //条件查询带分页
+    @ApiOperation("条件查询分页")
+    @PostMapping("findQueryPage/{current}/{limit}")
+    public Result findPage(@PathVariable long current,
+                           @PathVariable long limit,
+                           @RequestBody(required = false) TeacherQueryVo teacherQueryVo){
+        //创建page对象
+        Page<Teacher> pageParam = new Page<>(current, limit);
+
+        //判断teacherQueryVo是否为空
+        if (teacherQueryVo == null){    //查询全部
+            IPage<Teacher> pageModel = teacherService.page(pageParam,null);
+            return Result.ok(pageModel);
+        }else {
+            //获取条件值，
+            String name = teacherQueryVo.getName();
+            Integer level = teacherQueryVo.getLevel();
+            String joinDateBegin = teacherQueryVo.getJoinDateBegin();
+            String joinDateEnd = teacherQueryVo.getJoinDateEnd();
+            //进行非空判断，条件封装
+            QueryWrapper<Teacher> wrapper = new QueryWrapper<>();
+            if (!StringUtils.isEmpty(name)){
+                wrapper.like("name",name);
+            }
+
+            if (!StringUtils.isEmpty(level)){
+                wrapper.eq("lever",level);
+            }
+
+            if (!StringUtils.isEmpty(joinDateBegin)){
+                wrapper.ge("join_date",joinDateBegin);
+            }
+
+            if (!StringUtils.isEmpty(joinDateEnd)){
+                wrapper.le("join_date",joinDateEnd);
+            }
+
+            //调用方法分页查询
+            IPage<Teacher> pageModel = teacherService.page(pageParam, wrapper);
+            return Result.ok(pageModel);
+        }
+
+
     }
 }
 
