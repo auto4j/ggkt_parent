@@ -69,11 +69,11 @@ public class TeacherController {
         }
     }
 
-    //条件查询带分页
+    //3.条件查询带分页
     @ApiOperation("条件查询分页")
     @PostMapping("findQueryPage/{current}/{limit}")
-    public Result findPage(@PathVariable long current,
-                           @PathVariable long limit,
+    public Result findPage(@PathVariable Long current,
+                           @PathVariable Long limit,
                            @RequestBody(required = false) TeacherQueryVo teacherQueryVo){
         //创建page对象
         Page<Teacher> pageParam = new Page<>(current, limit);
@@ -110,8 +110,40 @@ public class TeacherController {
             IPage<Teacher> pageModel = teacherService.page(pageParam, wrapper);
             return Result.ok(pageModel);
         }
-
-
     }
+
+    //4添加讲师
+    @ApiOperation("添加讲师")
+    @PostMapping("saveTeacher")
+    public Result saveTeacher(@RequestBody Teacher teacher){
+        boolean isSuccess = teacherService.save(teacher);
+        if (isSuccess){
+            return Result.ok(null);
+        }else {
+            return Result.fail(null);
+        }
+    }
+
+    //5修改-根据id查询
+    @ApiOperation("根据id查询")
+    @GetMapping("getTeacher/{id}")
+    public Result getTeacher(@PathVariable Long id){
+        Teacher teacher = teacherService.getById(id);
+        return Result.ok(teacher);
+    }
+
+    //6修改-最终实现
+    @ApiOperation("修改最终实现")
+    @PostMapping("updateTeacherF")
+    public Result updateTeacher(@RequestBody Teacher teacher){
+        boolean isSuccess = teacherService.updateById(teacher);
+        if (isSuccess){
+            return Result.ok(null);
+        }else {
+            return Result.fail(null);
+        }
+    }
+
+
 }
 
